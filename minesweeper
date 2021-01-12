@@ -1,0 +1,233 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.Random;
+ 
+public class Miiinesweeper extends JApplet implements ActionListener, MouseListener, MouseMotionListener{
+ 
+ Random r = new Random();
+ Timer t = new Timer(5, this);
+ Graphics g2;
+ Image noton;
+ boolean inGame = true, mouse1 = false, mouse2 = false;
+ int mouseX, mouseY;
+ boolean flags[] = new boolean[100];
+ boolean cell[] = new boolean[100];
+ int minesX[] = new int[10];
+ int minesY[] = new int[10];
+ 
+ public void init(){
+  t.start();
+  setSize(400, 400);
+  addMouseListener(this);
+  addMouseMotionListener(this);
+  setFocusable(true);
+  setup();
+  noton = createImage(400, 400);
+  g2 = noton.getGraphics();
+ }
+ public void update(Graphics g){
+  paint(g);
+ }
+ public void setup(){
+  setMines();
+  setCell
+();
+  setFlags();
+ }
+ public void actionPerformed(ActionEvent e){
+  repaint();
+ }
+ 
+ public int mines(int x, int y){ // maps number of mines proximate to the cell [x,y]
+  int a = 0;
+  if(isMine(x-40, y-40)){a++;}
+  if(isMine(x-40, y)){a++;}
+  if(isMine(x-40, y+40)){a++;}
+  if(isMine(x, y-40)){a++;}
+  if(isMine(x, y+40)){a++;}
+  if(isMine(x+40, y-40)){a++;}
+  if(isMine(x+40, y)){a++;}
+  if(isMine(x+40, y+40)){a++;}
+  return a;
+ }
+ public void setMines(){
+  for(int z = 0; z < 10; z++){
+   minesX[z] = r.nextInt(10)*40;
+   minesY[z] = r.nextInt(10)*40;
+   for(int a = z-1; a >= 0; a--){
+    if(minesX[a] == minesX[z] && minesY[a] == minesY[z]){
+     setMines();
+    }
+   }
+  }
+ }
+ 
+  public void paint(Graphics g){ // generic paint method which maps the number of mines and colors in each cell
+  g2.clearRect(0, 0, 400, 400);
+  g2.setColor(Color.BLACK);
+  g2.fillRect(0, 0, 400, 400);
+  if(inGame){
+   g2.setColor(Color.RED);
+   for(int z = 0; z < 10; z++){
+    g2.fillRect(minesX[z], minesY[z], 40, 40);
+   }
+   for(int a = 0; a < 10; a++){
+    for(int b = 0; b < 10; b++){
+     if(!isMine(a*40, b*40)){
+      g2.setColor(Color.WHITE);
+      if(mines(a*40, b*40) != 0){
+       g2.drawString(""+mines(a*40, b*40), a*40+17, b*40+25);
+      }
+     }
+     if(cell[(b*10)+a]){
+      g2.setColor(Color.BLUE);
+      g2.fillRect((a*40)+2, (b*40)+2, 36, 36);
+     }
+     if(flags[(b*10)+a]){
+      g2.setColor(Color.GREEN);
+      g2.fillRect((a*40)+2, (b*40)+2, 36, 36);
+     }
+     g2.setColor(Color.WHITE);
+     g2.fillRect(a*40, b*40, 40, 2);
+     g2.fillRect(a*40, b*40, 2, 40);
+     g2.fillRect((a*40)+38, b*40, 2, 40);
+     g2.fillRect(a*40, (b*40)+38, 40, 2);
+    }
+   }
+  }
+  else{
+   g2.setColor(Color.WHITE);
+   g2.drawString("GAME OVER", 0, 10);
+  }
+  g.drawImage(noton, 0, 0, this);
+ }
+ 
+ public void setCell(){ // makes each block a cell
+  for(int z = 0; z < 100; z++){
+   cell[z] = true;
+  }
+ }
+ public void setFlags(){ // each cell has a flag
+  for(int z = 0; z < 100; z++){
+   flags[z] = false;
+  }
+ }
+public void emptyCell(int x, int y){ //empties cell to determine where mines are with respect to the cell and the int casted coordinates
+  int c = (int) Math.floor(x/40);
+  int d = (int) Math.floor(y/40);
+  if(c < 9){
+   if(cell[(d*10)+c+1] == true){
+    cell[(d*10)+c+1] = false;
+    if(mines((c*40)+40, d*40) == 0 && isMine((c*40)+40, d*40) == false){
+     emptyCell((c*40)+40, d*40);
+    }
+   }
+  }
+  if(c > 0){
+   if(cell[(d*10)+c-1] == true){
+    cell[(d*10)+c-1] = false;
+    if(mines((c*40)-40, d*40) == 0 && isMine((c*40)-40, d*40) == false){
+     emptyCell((c*40)-40, y);
+    }
+   }
+  }
+  if(d < 9){
+   if(cell[(d*10)+c+10] == true){
+    cell[(d*10)+c+10] = false;
+    if(mines(c*40, (d*40)+40) == 0 && isMine(c*40, (d*40)+40) == false){
+     emptyCell(c*40, (d*40)+40);
+    }
+   }
+  }
+  if(d > 0){
+   if(cell[(d*10)+c-10] == true){
+    cell[(d*10)+c-10] = false;
+    if(mines(c*40, (d*40)-40) == 0 && isMine(c*40, (d*40)-40) == false){
+     emptyCell(c*40, (d*40)-40);
+    }
+   }
+  }
+  if(c < 9 && d < 9){
+   if(cell[(d*10)+c+11] == true){
+    cell[(d*10)+c+11] = false;
+    if(mines((c*40)+40, (d*40)+40) == 0 && isMine((c*40)+40, (d*40)+40) == false){
+     emptyCell((c*40)+40, (d*40)+40);
+    }
+   }
+  }
+  if(c > 0 && d > 0){
+   if(cell[(d*10)+c-11] == true){
+    cell[(d*10)+c-11] = false;
+    if(mines((c*40)-40, (d*40)-40) == 0 && isMine((c*40)-40, (d*40)-40) == false){
+     emptyCell((c*40)-40, (d*40)-40);
+    }
+   }
+  }
+  if(c > 0 && d < 9){
+   if(cell[(d*10)+c+9] == true){
+    cell[(d*10)+c+9] = false;
+    if(mines((c*40)-40, (d*40)+40) == 0 && isMine((c*40)-40, (d*40)+40) == false){
+     emptyCell((c*40)-40, (d*40)+40);
+    }
+   }
+  }
+}
+ public boolean isMine(int x, int y){ // checks if cell is a mine or not
+  boolean a = false;
+  for(int z = 0; z < 10; z++){
+   if(minesX[z] == x && minesY[z] == y){
+    a = true;
+   }
+  }
+  return a;
+ }
+ 
+ public void mousePressed(MouseEvent e){
+  int code = e.getButton();
+  if(code == MouseEvent.BUTTON1){
+   mouse1 = true;
+  }
+  if(code == MouseEvent.BUTTON3){
+   mouse2 = true;
+  }
+ }
+ public void mouseClicked(MouseEvent e){}
+ 
+ public void mouseReleased(MouseEvent e){ // method which finds where mouse has clicked and indicates its button. then, it checks what action the button a=has called, such as if the cell is a bomb or not and so on
+  int code = e.getButton();
+  if(code == MouseEvent.BUTTON1){
+   if(mouse1){
+    int a = (int) Math.floor(mouseX/40);
+    int b = (int) Math.floor(mouseY/40);
+    if(flags[(b*10)+a] == false){
+     cell[(b*10)+a] = false;
+     if(mines(a*40, b*40) == 0){
+      emptyCell(mouseX, mouseY);
+     }
+     for(int z = 0; z < 10; z++){
+      if(minesX[z] == a*40 && minesY[z] == b*40){
+       inGame = false;
+      }
+     }
+    }
+    mouse1 = false;
+   }
+  }
+  if(code == MouseEvent.BUTTON3){
+   int a = (int) Math.floor(mouseX/40);
+   int b = (int) Math.floor(mouseY/40);
+   if(flags[(b*10)+a]){
+    flags[(b*10)+a] = false;
+   }
+   else if(cell[(b*10)+a]){
+    flags[(b*10)+a] = true;
+   }
+   mouse2 = false;
+  }
+ }
+ public void mouseEntered(MouseEvent e){}
+ public void mouseExited(MouseEvent e){}
+ public void mouseMoved(MouseEvent e){mouseX = e.getX(); mouseY = e.getY();}
+ public void mouseDragged(MouseEvent e){}
+}
