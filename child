@@ -1,0 +1,9 @@
+public class Child extends Parent{
+  private int mapkey;
+  private int quali;
+  private int quant;
+  
+  public Child(int qt, int ql, int mk){
+    
+  }
+}
