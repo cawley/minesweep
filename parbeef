@@ -1,0 +1,24 @@
+public class Parent{
+  
+  private int quant;
+  private int qual;
+  private int map_key;
+  
+  public Parent(int ql, int qt, int mk){
+    ql = qual;
+    qt = quant;
+    mk = map_key;
+  }
+  
+  public int getQuant(){ 
+    return quant;
+  }
+  public int getMapKey(){
+    return map_key;
+  }
+  public int getQual(){
+    return qual;
+  }
+
+
+}
